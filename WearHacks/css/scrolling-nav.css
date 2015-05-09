@@ -8,6 +8,14 @@
 
     margin: 0 auto;
 }
+#temperatureChartContainer {
+
+    margin: 0 auto;
+}
+#pressureChartContainer {
+
+    margin: 0 auto;
+}
 
 body {
     width: 100%;
@@ -54,24 +62,29 @@ of those sections to manage the look and feel of the site. */
 }
 
 
-
-.about-section {
+.speech-transcript {
     height: 100%;
     padding-top: 150px;
     text-align: center;
     background: #eee;
 }
 
-.services-section {
+.mood-word {
     height: 100%;
     padding-top: 150px;
     text-align: center;
-    background: #fff;
+    background: #efe;
 }
 
-.contact-section {
+.mood-temperature {
     height: 100%;
     padding-top: 150px;
     text-align: center;
     background: #eee;
+}
+.mood-pressure {
+    heigh: 100%;
+    padding-top: 150px;
+    text-align: center;
+    background: #efe;
 }
