@@ -49,10 +49,18 @@ of those sections to manage the look and feel of the site. */
     padding-top: 150px;
     text-align: center;
     /*background: #666;*/
-    background-image: url('../img/Soundwave.jpg');
+    background: linear-gradient(#000 20%, transparent 90%), 
+    linear-gradient(0deg, #eee 0.0001%, transparent 90%),
+    #ffa949 url('../img/Soundwave.jpg') no-repeat center;
+  
+  background-size: cover;
+
+
+
+    /*background-image: url('../img/Soundwave.jpg');
     background-size: cover;
     background-repeat: no-repeat;
-    background-position: center;
+    background-position: center;*/
 }
 
 .intro-section h1 {
@@ -63,29 +71,37 @@ of those sections to manage the look and feel of the site. */
 
 
 .speech-transcript {
+    color: #555;
     height: 100%;
     padding-top: 75px;
     text-align: center;
     background: #eee;
+    font-family: monospace;
 }
 
 .mood-word {
+    color: white;
     height: 100%;
     padding-top: 75px;
     text-align: center;
-    background: #888;
+    background: #555;
+    font-family: monospace;
 }
 
 .mood-temperature {
+    color: #555;
     height: 100%;
     padding-top: 75px;
     text-align: center;
     background: #eee;
+    font-family: monospace;
 }
 .mood-pressure {
+    color: white;
     heigh: 100%;
     padding-top: 75px;
     padding-bottom: 75px;
     text-align: center;
-    background: #888;
+    background: #555;
+    font-family: monospace;
 }
