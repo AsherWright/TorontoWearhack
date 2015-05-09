@@ -64,27 +64,28 @@ of those sections to manage the look and feel of the site. */
 
 .speech-transcript {
     height: 100%;
-    padding-top: 150px;
+    padding-top: 75px;
     text-align: center;
     background: #eee;
 }
 
 .mood-word {
     height: 100%;
-    padding-top: 150px;
+    padding-top: 75px;
     text-align: center;
     background: #888;
 }
 
 .mood-temperature {
     height: 100%;
-    padding-top: 150px;
+    padding-top: 75px;
     text-align: center;
     background: #eee;
 }
 .mood-pressure {
     heigh: 100%;
-    padding-top: 150px;
+    padding-top: 75px;
+    padding-bottom: 75px;
     text-align: center;
     background: #888;
 }
