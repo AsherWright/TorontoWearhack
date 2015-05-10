@@ -1,0 +1,108 @@
+//Temperature and pressure sensor with series out function
+//Ming Yang, ming.yang@mcgill.ca
+//2015, May, 10th
+
+#include <Wire.h>
+#include <SeeedOLED.h>
+#include "Barometer.h"
+#include "Seeed_QTouch.h"
+#include <TimerOne.h>
+
+#define DEBUGING while(true) {Serial.println("DEBUG...");}  
+
+
+float temperature;
+float pressure;
+int start;
+
+
+Barometer myBarometer;
+
+
+
+void setup()
+{
+  Serial.begin(115200);
+  Wire.begin();
+  SeeedOled.init();   //initialze SEEED OLED display
+  myBarometer.init(); //Barometer init   
+  Timer1.initialize(150000);         // initialize timer1
+  Timer1.attachInterrupt(callback);  // attaches callback() as a timer overflow interrupt
+}
+
+void callback()
+{
+  int tn = QTouch.touchNum();    
+  if(tn == 0) {    
+    start=1;   
+  }
+  if(tn == 1 | tn == 2) {    
+    start=0;   
+  }
+}
+
+void messagetoSerial()
+{
+
+  Serial.print("#S|TEMP|[");
+  delay(10);
+  Serial.print(temperature);
+  delay(10);
+  Serial.println("]#");
+  delay(10);
+  Serial.print("#S|PRESSURE|[");
+  delay(10);
+  Serial.print(pressure);
+  delay(10);
+  Serial.println("]#");
+}
+
+void messagetoOled()
+{
+  SeeedOled.setTextXY(2,6);
+  SeeedOled.putNumber(temperature); //Print the String
+  SeeedOled.putString(" deg C");
+  SeeedOled.setTextXY(3,6);
+  SeeedOled.putNumber(pressure);
+  SeeedOled.putString(" Pa");
+}
+void loop()
+{ 
+  if (start==0)
+  {
+    //SeeedOled.setNormalDisplay();
+    //SeeedOled.setInverseDisplay();
+    //SeeedOled.setTextXY(0,0); 
+    //SeeedOled.drawBitmap(PIC,1024);
+    SeeedOled.clearDisplay();          //clear the screen and set start position to top left corner
+    SeeedOled.setNormalDisplay();      //Set display to normal mode (i.e non-inverse mode)
+    SeeedOled.setPageMode();           //Set addressing mode to Page Mode
+    SeeedOled.setTextXY(3,1);          //Set the cursor to Xth Page, Yth Column  
+    SeeedOled.putString("Ready to start!"); //Print the String
+    delay(1000);
+  }
+//  {start=Serial.read();}
+  if(start==1)
+    {
+    SeeedOled.clearDisplay();
+    initOledTitle();    //init OLED Title
+    temperature = myBarometer.bmp085GetTemperature(myBarometer.bmp085ReadUT()); //Get the temperature, bmp085ReadUT MUST be called first  
+    pressure = myBarometer.bmp085GetPressure(myBarometer.bmp085ReadUP());// Get the pressure
+    messagetoSerial(); 
+    messagetoOled();
+    delay(10000);
+   }
+}
+
+void initOledTitle(void){
+  SeeedOled.clearDisplay();          //clear the screen and set start position to top left corner
+  SeeedOled.setNormalDisplay();      //Set display to normal mode (i.e non-inverse mode)
+  SeeedOled.setPageMode();           //Set addressing mode to Page Mode
+  SeeedOled.setTextXY(0,4);          //Set the cursor to Xth Page, Yth Column  
+  SeeedOled.putString("Running.."); //Print the String
+  SeeedOled.setTextXY(2,0);          //Set the cursor to Xth Page, Yth Column  
+  SeeedOled.putString("Temp:");       //Print the String
+  SeeedOled.setTextXY(3,0);
+  SeeedOled.putString("Pres:"); 
+
+}
