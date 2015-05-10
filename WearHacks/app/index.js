@@ -6,7 +6,7 @@ var server = http.createServer(function(req, res) {
     if(req.url == "/"){
     var globalWords = [];
     var globalTime = [];
-
+    var syncTimeData = [];
     var gwIndex = 0;
 	   res.writeHead(200);
 	   currentHit++;
@@ -27,6 +27,7 @@ var server = http.createServer(function(req, res) {
                     if(splitItems[2].length > 4){
                         globalWords[gwIndex] = splitItems[2];
                         globalTime[gwIndex] = splitItems[0];
+
                         gwIndex +=1;
                     }
                     
@@ -52,6 +53,7 @@ var server = http.createServer(function(req, res) {
                         if(lineItems[1].indexOf("jaw") > -1){
                             jawData[jawIndex] = lineItems[2].replace(" ","");
                             timeData[jawIndex] = lineItems[0]; 'to put to MS'
+                            //syncTimeData[jawIndex] = lineItems[0] - 4*3600;
                             //console.log(Number(timeData[jawIndex]) + "      " + Number(jawData[jawIndex]));
                              jawIndex +=1;
                         }
@@ -89,17 +91,22 @@ var server = http.createServer(function(req, res) {
                     //console.log("lol:" + globalWords.length);
                     for(i = 0; i < globalWords.length -1; i++){
                         newWords[newWordIndex] = globalWords[i];
+                        var tempValue = getWordMoodAtTime(moodData, moodTimeData, globalTime[i]/1000);
+                        if(tempValue != -1){
+                            mood[newWordIndex] = getWordMoodAtTime(moodData, moodTimeData, globalTime[i]/1000);
+                            newWordIndex +=1;
+                        }else{
+
+                        }
                         
-                        mood[newWordIndex] = getMoodAtTime(moodData, moodTimeData, globalTime[i]/1000);
                         //console.log(globalTime[i]);
                         //console.log(mood[newWordIndex]);
-                        newWordIndex +=1;
 
                     }
                     var bestWord = "";
                     var worstWord = "";
                     var maxMood = 0;
-                    var minMood = 9999;
+                    var minMood = 999999;
                     console.log("length: " + mood.length);
                     for(i = 0; i < mood.length-1; i++){
                         var tmpMood = 0;
@@ -249,14 +256,21 @@ var server = http.createServer(function(req, res) {
                             pressures = [],
                             times = [],
                             seriesData = false;
-
+                        var badPoints = 0;
                         for(i = 0; i < lines.length-1; i++){
                             var splitItems = lines[i].split(";");
                             pressures[i] = splitItems[1];
-                            times[i] = splitItems[0].split(" ")[1];
-                            var moodValue = Math.random() * (10)
-                            seriesData = ((seriesData) ? seriesData + ",[" : "[[") + Number(pressures[i]) + "," + Number(moodValue) + "]";
+                            //console.log("time: " + splitItems[0]);
+                            times[i] = convertTimeToLongTime(splitItems[0]); //.split(" ")[1]
+                            var moodValue = getMoodAtTime(moodData,moodTimeData,times[i]/100);
+                            if(moodValue != -1){
+                               seriesData = ((seriesData) ? seriesData + ",[" : "[[") + Number(pressures[i]) + "," + Number(moodValue) + "]";
+                            }else{
+                                //console.log("god a bad press point");
+                                badPoints +=1;
+                            }
                         }
+                        console.log("total bad press: " + badPoints + "   total points: " + (lines.length -1 - badPoints));
                         seriesData +="]";
                         //console.log(seriesData);
                         data1 = data1.replace(/\%_pressureSeriesData_\%/gi, seriesData);
@@ -267,14 +281,20 @@ var server = http.createServer(function(req, res) {
                                 temperatures = [],
                                 times = [],
                                 seriesData = false;
-
+                            var badPoints = 0;
                             for(i = 0; i < lines.length-1; i++){
                                 var splitItems = lines[i].split(";");
                                 temperatures[i] = splitItems[1];
-                                times[i] = splitItems[0].split(" ")[1];
-                                var moodValue = Math.random() * 1
-                                seriesData = ((seriesData) ? seriesData + ",[" : "[[") + Number(temperatures[i]) + "," + Number(-i/20 + 7) + "]";
+                                times[i] = convertTimeToLongTime(splitItems[0]); //.split(" ")[1];
+                                var moodValue = getMoodAtTime(moodData, moodTimeData, times[i]/100);
+                                if(moodValue != -1){
+                                    seriesData = ((seriesData) ? seriesData + ",[" : "[[") + Number(temperatures[i]) + "," + Number(moodValue) + "]";
+                                }else{
+                                    //console.log("got a bad temp point");
+                                    badPoints+=1;
+                                }
                             }
+                            console.log("total bad temp: " + badPoints + "    total points: " + (lines.length-1-badPoints));
                             seriesData += "]";
                             //console.log(seriesData);
                             data1 = data1.replace(/\%_tempSeriesData_\%/gi, seriesData);
@@ -327,15 +347,52 @@ function getMoodAtTime(moodData, moodTimeData, time)
 {
     var min = 999999;
     var value = 0;
-    console.log("mt:" + moodTimeData + "     t:" + time);
+    //console.log("mt:" + moodTimeData + "     t:" + time);
     for(j = 0; j < moodTimeData.length -1; j++){
-        if(moodTimeData[j] - time < min){
-            min = moodTimeData[j] - time;
+        if(moodTimeData[j]-4*3600 - time < min){
+            min = Math.abs(moodTimeData[j]-4*3600 - time);
             value = moodData[j];
         }
     }
-    if(min > 60){
-        value = 5; 
+    if(min > 100){
+        value = -1;
     }
+    //console.log("min: " + min);
+
     return value;
+}
+function getWordMoodAtTime(moodData, moodTimeData, time)
+{
+    var min = 999999;
+    var value = 0;
+    //console.log("mt:" + moodTimeData + "     t:" + time);
+    for(j = 0; j < moodTimeData.length -1; j++){
+        if(moodTimeData[j] - time < min){
+            min = Math.abs(moodTimeData[j] - time);
+            value = moodData[j];
+        }
+    }
+    if(min > 100){
+        value = -1;
+    }
+    //console.log("min: " + min);
+
+    return value;
+}
+function convertTimeToLongTime(dateTime){
+    var ymd = dateTime.split(" ")[0].split("-");
+    var year = ymd[0];
+    var month = ymd[1];
+    var day = ymd[2];
+    var hms = dateTime.split(" ")[1].split(":");
+    var hour = hms[0];
+    var minute = hms[1];
+    var second = hms[2];
+    //console.log(day + "   " + hour + "   " + minute + "   " + second );
+    var timeInLong = 1431216000; //Takes us to May 10th (TODAY)
+    timeInLong += (day - 10)*3600*24;
+    timeInLong += hour*3600;
+    timeInLong += minute*60;
+    timeInLong += second;
+    return timeInLong;
 }

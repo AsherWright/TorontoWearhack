@@ -63,10 +63,20 @@ of those sections to manage the look and feel of the site. */
     background-position: center;*/
 }
 
+#user {
+    text-align: right;
+
+
+}
+
 .intro-section h1 {
     color: white;
     font-family: monospace;
 
+}
+.intro-section h3 {
+    color: #888;
+    font-family: serif;
 }
 
 
